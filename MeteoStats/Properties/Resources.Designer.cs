@@ -63,9 +63,9 @@ namespace MeteoStats.Properties {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _4150897 {
+        internal static System.Drawing.Bitmap rain {
             get {
-                object obj = ResourceManager.GetObject("4150897", resourceCulture);
+                object obj = ResourceManager.GetObject("rain", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
