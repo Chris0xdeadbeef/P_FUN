@@ -6,5 +6,20 @@ namespace MeteoStats
         {
             InitializeComponent();
         }
+
+        private void CheckBoxRain_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxTemp_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void checkBoxUv_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }
