@@ -1,8 +1,13 @@
+///ETML
+///Auteur : Christopher Ristic 
+///Date: 08.09.2025
+///Description: Contient les méthodes pour la fenêtre principale
+
 namespace MeteoStats
 {
-    public partial class Form1 : Form
+    public partial class MainWindow : Form
     {
-        public Form1()
+        public MainWindow()
         {
             InitializeComponent();
         }
