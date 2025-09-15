@@ -37,8 +37,10 @@
             checkBoxUv = new CheckBox();
             ville = new Label();
             checkBoxCelsius = new CheckBox();
-            checkBoxFahr = new CheckBox();
+            checkBoxFahrenheit = new CheckBox();
             graphicPlot = new ScottPlot.WinForms.FormsPlot();
+            fonctionLabel = new Label();
+            fonctionUserInput = new TextBox();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
@@ -76,6 +78,7 @@
             // 
             // checkBoxRain
             // 
+            checkBoxRain.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             checkBoxRain.AutoSize = true;
             checkBoxRain.Location = new Point(60, 71);
             checkBoxRain.Name = "checkBoxRain";
@@ -86,26 +89,29 @@
             // 
             // checkBoxTemp
             // 
+            checkBoxTemp.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             checkBoxTemp.AutoSize = true;
-            checkBoxTemp.Location = new Point(106, 71);
+            checkBoxTemp.Location = new Point(109, 71);
             checkBoxTemp.Name = "checkBoxTemp";
             checkBoxTemp.Size = new Size(15, 14);
             checkBoxTemp.TabIndex = 4;
             checkBoxTemp.UseVisualStyleBackColor = true;
-            checkBoxTemp.CheckedChanged += checkBoxTemp_CheckedChanged;
+            checkBoxTemp.CheckedChanged += CheckBoxTemp_CheckedChanged;
             // 
             // checkBoxUv
             // 
+            checkBoxUv.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             checkBoxUv.AutoSize = true;
-            checkBoxUv.Location = new Point(153, 71);
+            checkBoxUv.Location = new Point(154, 71);
             checkBoxUv.Name = "checkBoxUv";
             checkBoxUv.Size = new Size(15, 14);
             checkBoxUv.TabIndex = 5;
             checkBoxUv.UseVisualStyleBackColor = true;
-            checkBoxUv.CheckedChanged += checkBoxUv_CheckedChanged;
+            checkBoxUv.CheckedChanged += CheckBoxUv_CheckedChanged;
             // 
             // ville
             // 
+            ville.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             ville.AutoSize = true;
             ville.Font = new Font("Segoe UI", 12F);
             ville.Location = new Point(396, 22);
@@ -116,6 +122,7 @@
             // 
             // checkBoxCelsius
             // 
+            checkBoxCelsius.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             checkBoxCelsius.AutoSize = true;
             checkBoxCelsius.Font = new Font("Segoe UI", 11F);
             checkBoxCelsius.Location = new Point(915, 39);
@@ -124,35 +131,55 @@
             checkBoxCelsius.TabIndex = 7;
             checkBoxCelsius.Text = "C°";
             checkBoxCelsius.UseVisualStyleBackColor = true;
-            checkBoxCelsius.CheckedChanged += checkBoxCelsius_CheckedChanged;
+            checkBoxCelsius.CheckedChanged += CheckBoxCelsius_CheckedChanged;
             // 
-            // checkBoxFahr
+            // checkBoxFahrenheit
             // 
-            checkBoxFahr.AutoSize = true;
-            checkBoxFahr.Font = new Font("Segoe UI", 11F);
-            checkBoxFahr.Location = new Point(986, 39);
-            checkBoxFahr.Name = "checkBoxFahr";
-            checkBoxFahr.Size = new Size(41, 24);
-            checkBoxFahr.TabIndex = 8;
-            checkBoxFahr.Text = "F°";
-            checkBoxFahr.UseVisualStyleBackColor = true;
-            checkBoxFahr.CheckedChanged += checkBoxFahr_CheckedChanged;
+            checkBoxFahrenheit.AutoSize = true;
+            checkBoxFahrenheit.Font = new Font("Segoe UI", 11F);
+            checkBoxFahrenheit.Location = new Point(986, 39);
+            checkBoxFahrenheit.Name = "checkBoxFahrenheit";
+            checkBoxFahrenheit.Size = new Size(41, 24);
+            checkBoxFahrenheit.TabIndex = 8;
+            checkBoxFahrenheit.Text = "F°";
+            checkBoxFahrenheit.UseVisualStyleBackColor = true;
             // 
             // graphicPlot
             // 
+            graphicPlot.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             graphicPlot.DisplayScale = 1F;
             graphicPlot.Location = new Point(27, 114);
             graphicPlot.Name = "graphicPlot";
             graphicPlot.Size = new Size(1126, 615);
             graphicPlot.TabIndex = 9;
             // 
+            // fonctionLabel
+            // 
+            fonctionLabel.AutoSize = true;
+            fonctionLabel.BackColor = SystemColors.ActiveCaption;
+            fonctionLabel.Font = new Font("Segoe UI", 12F);
+            fonctionLabel.Location = new Point(60, 760);
+            fonctionLabel.Name = "fonctionLabel";
+            fonctionLabel.Size = new Size(35, 21);
+            fonctionLabel.TabIndex = 10;
+            fonctionLabel.Text = "f(x):";
+            // 
+            // fonctionUserInput
+            // 
+            fonctionUserInput.Location = new Point(94, 760);
+            fonctionUserInput.Name = "fonctionUserInput";
+            fonctionUserInput.Size = new Size(1044, 23);
+            fonctionUserInput.TabIndex = 12;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1184, 961);
+            Controls.Add(fonctionUserInput);
+            Controls.Add(fonctionLabel);
             Controls.Add(graphicPlot);
-            Controls.Add(checkBoxFahr);
+            Controls.Add(checkBoxFahrenheit);
             Controls.Add(checkBoxCelsius);
             Controls.Add(ville);
             Controls.Add(checkBoxUv);
@@ -163,6 +190,7 @@
             Controls.Add(pictureBox1);
             Name = "MainWindow";
             Text = "MeteoStats";
+            Resize += MainWindow_Resize;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
@@ -180,7 +208,9 @@
         private CheckBox checkBoxUv;
         private Label ville;
         private CheckBox checkBoxCelsius;
-        private CheckBox checkBoxFahr;
+        private CheckBox checkBoxFahrenheit;
         private ScottPlot.WinForms.FormsPlot graphicPlot;
+        private Label fonctionLabel;
+        private TextBox fonctionUserInput;
     }
 }
