@@ -5,44 +5,52 @@
 
 namespace MeteoStats
 {
+
     public partial class MainWindow : Form
     {
         public MainWindow()
         {
-            InitializeComponent();           
+            InitializeComponent();
 
-            Controls.Add(graphicPlot);
-            double[] xs = { 0, 1, 2, 3, 4 };
-            double[] ys = { 0, 1, 4, 9, 16 };
-
-            graphicPlot.Plot.Add.Scatter(xs, ys);
-
-            graphicPlot.Refresh();
         }
+    
+
 
         private void CheckBoxRain_CheckedChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void checkBoxTemp_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxTemp_CheckedChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void checkBoxUv_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxUv_CheckedChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void checkBoxCelsius_CheckedChanged(object sender, EventArgs e)
+        private void CheckBoxCelsius_CheckedChanged(object sender, EventArgs e)
+        {
+            checkBoxCelsius.Refresh();
+        }
+
+        private void CheckBoxFahrenheit_CheckedChanged(object sender, EventArgs e)
         {
 
         }
 
-        private void checkBoxFahr_CheckedChanged(object sender, EventArgs e)
-        {
 
+        private void MainWindow_Resize(object sender, EventArgs e)
+        {
+            int newX = ClientSize.Width - checkBoxFahrenheit.Width - 100; // marge
+            
+            const Int16 newY = 40; // 10 px du haut
+
+            checkBoxFahrenheit.Location = new Point(newX, newY);
+            checkBoxCelsius.Location = new Point(newX - 50, newY);
         }
     }
 }
+
