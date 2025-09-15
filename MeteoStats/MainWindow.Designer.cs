@@ -40,7 +40,17 @@
             checkBoxFahrenheit = new CheckBox();
             graphicPlot = new ScottPlot.WinForms.FormsPlot();
             fonctionLabel = new Label();
-            fonctionUserInput = new TextBox();
+            functionInput = new TextBox();
+            label1 = new Label();
+            beginDateInput = new TextBox();
+            endDateInput = new TextBox();
+            label2 = new Label();
+            timeBeginInput = new TextBox();
+            timeEndInput = new TextBox();
+            importButton = new Button();
+            exportButton = new Button();
+            titleHorizon = new Label();
+            titleVertical = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
@@ -125,7 +135,7 @@
             checkBoxCelsius.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             checkBoxCelsius.AutoSize = true;
             checkBoxCelsius.Font = new Font("Segoe UI", 11F);
-            checkBoxCelsius.Location = new Point(915, 39);
+            checkBoxCelsius.Location = new Point(916, 39);
             checkBoxCelsius.Name = "checkBoxCelsius";
             checkBoxCelsius.Size = new Size(43, 24);
             checkBoxCelsius.TabIndex = 7;
@@ -155,28 +165,140 @@
             // 
             // fonctionLabel
             // 
+            fonctionLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             fonctionLabel.AutoSize = true;
             fonctionLabel.BackColor = SystemColors.ActiveCaption;
             fonctionLabel.Font = new Font("Segoe UI", 12F);
-            fonctionLabel.Location = new Point(60, 760);
+            fonctionLabel.Location = new Point(56, 763);
             fonctionLabel.Name = "fonctionLabel";
             fonctionLabel.Size = new Size(35, 21);
             fonctionLabel.TabIndex = 10;
             fonctionLabel.Text = "f(x):";
             // 
-            // fonctionUserInput
+            // functionInput
             // 
-            fonctionUserInput.Location = new Point(94, 760);
-            fonctionUserInput.Name = "fonctionUserInput";
-            fonctionUserInput.Size = new Size(1044, 23);
-            fonctionUserInput.TabIndex = 12;
+            functionInput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            functionInput.BackColor = SystemColors.ActiveCaption;
+            functionInput.Font = new Font("Segoe UI", 12F);
+            functionInput.Location = new Point(94, 760);
+            functionInput.Name = "functionInput";
+            functionInput.Size = new Size(1044, 29);
+            functionInput.TabIndex = 12;
+            // 
+            // label1
+            // 
+            label1.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label1.AutoSize = true;
+            label1.BackColor = SystemColors.ActiveBorder;
+            label1.Font = new Font("Segoe UI", 12F);
+            label1.Location = new Point(46, 824);
+            label1.Name = "label1";
+            label1.Size = new Size(86, 21);
+            label1.TabIndex = 13;
+            label1.Text = "Date début";
+            // 
+            // beginDateInput
+            // 
+            beginDateInput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            beginDateInput.BackColor = SystemColors.ActiveCaption;
+            beginDateInput.Location = new Point(132, 823);
+            beginDateInput.Name = "beginDateInput";
+            beginDateInput.Size = new Size(85, 23);
+            beginDateInput.TabIndex = 14;
+            // 
+            // endDateInput
+            // 
+            endDateInput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            endDateInput.BackColor = SystemColors.ActiveCaption;
+            endDateInput.Location = new Point(132, 852);
+            endDateInput.Name = "endDateInput";
+            endDateInput.Size = new Size(85, 23);
+            endDateInput.TabIndex = 16;
+            // 
+            // label2
+            // 
+            label2.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            label2.AutoSize = true;
+            label2.BackColor = SystemColors.ActiveBorder;
+            label2.Font = new Font("Segoe UI", 12F);
+            label2.Location = new Point(46, 853);
+            label2.Name = "label2";
+            label2.Size = new Size(86, 21);
+            label2.TabIndex = 15;
+            label2.Text = "Date début";
+            // 
+            // timeBeginInput
+            // 
+            timeBeginInput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            timeBeginInput.BackColor = SystemColors.ActiveCaption;
+            timeBeginInput.Location = new Point(239, 822);
+            timeBeginInput.Name = "timeBeginInput";
+            timeBeginInput.Size = new Size(85, 23);
+            timeBeginInput.TabIndex = 17;
+            // 
+            // timeEndInput
+            // 
+            timeEndInput.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            timeEndInput.BackColor = SystemColors.ActiveCaption;
+            timeEndInput.Location = new Point(239, 853);
+            timeEndInput.Name = "timeEndInput";
+            timeEndInput.Size = new Size(85, 23);
+            timeEndInput.TabIndex = 18;
+            // 
+            // importButton
+            // 
+            importButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            importButton.Location = new Point(1013, 824);
+            importButton.Name = "importButton";
+            importButton.Size = new Size(92, 35);
+            importButton.TabIndex = 19;
+            importButton.Text = "Import";
+            importButton.UseVisualStyleBackColor = true;
+            // 
+            // exportButton
+            // 
+            exportButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            exportButton.Location = new Point(1013, 865);
+            exportButton.Name = "exportButton";
+            exportButton.Size = new Size(92, 35);
+            exportButton.TabIndex = 20;
+            exportButton.Text = "Export";
+            exportButton.UseVisualStyleBackColor = true;
+            // 
+            // titleHorizon
+            // 
+            titleHorizon.AutoSize = true;
+            titleHorizon.Location = new Point(533, 732);
+            titleHorizon.Name = "titleHorizon";
+            titleHorizon.Size = new Size(38, 15);
+            titleHorizon.TabIndex = 21;
+            titleHorizon.Text = "label3";
+            // 
+            // titleVertical
+            // 
+            titleVertical.AutoSize = true;
+            titleVertical.Location = new Point(12, 379);
+            titleVertical.Name = "titleVertical";
+            titleVertical.Size = new Size(38, 15);
+            titleVertical.TabIndex = 22;
+            titleVertical.Text = "label3";
             // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1184, 961);
-            Controls.Add(fonctionUserInput);
+            Controls.Add(titleVertical);
+            Controls.Add(titleHorizon);
+            Controls.Add(exportButton);
+            Controls.Add(importButton);
+            Controls.Add(timeEndInput);
+            Controls.Add(timeBeginInput);
+            Controls.Add(endDateInput);
+            Controls.Add(label2);
+            Controls.Add(beginDateInput);
+            Controls.Add(label1);
+            Controls.Add(functionInput);
             Controls.Add(fonctionLabel);
             Controls.Add(graphicPlot);
             Controls.Add(checkBoxFahrenheit);
@@ -211,6 +333,16 @@
         private CheckBox checkBoxFahrenheit;
         private ScottPlot.WinForms.FormsPlot graphicPlot;
         private Label fonctionLabel;
-        private TextBox fonctionUserInput;
+        private TextBox functionInput;
+        private Label label1;
+        private TextBox beginDateInput;
+        private TextBox endDateInput;
+        private Label label2;
+        private TextBox timeBeginInput;
+        private TextBox timeEndInput;
+        private Button importButton;
+        private Button exportButton;
+        private Label titleHorizon;
+        private Label titleVertical;
     }
 }

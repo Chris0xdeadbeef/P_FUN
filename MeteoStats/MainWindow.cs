@@ -46,10 +46,13 @@ namespace MeteoStats
         {
             int newX = ClientSize.Width - checkBoxFahrenheit.Width - 100; // marge
             
-            const Int16 newY = 40; // 10 px du haut
+            const Int16 topRightY = 40;
+            const Int16 bottomRightY = 824;
 
-            checkBoxFahrenheit.Location = new Point(newX, newY);
-            checkBoxCelsius.Location = new Point(newX - 50, newY);
+            checkBoxFahrenheit.Location = new Point(newX, topRightY);
+            checkBoxCelsius.Location = new Point(newX - 70, topRightY);
+            importButton.Location = new Point(newX - 50, bottomRightY);
+            exportButton.Location = new Point(newX - 50, bottomRightY - (importButton.Location.Y - exportButton.Location.Y));            
         }
     }
 }
