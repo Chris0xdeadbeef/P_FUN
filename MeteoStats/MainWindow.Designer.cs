@@ -265,6 +265,7 @@
             exportButton.TabIndex = 20;
             exportButton.Text = "Export";
             exportButton.UseVisualStyleBackColor = true;
+            exportButton.Click += OnClickExport;
             // 
             // titleHorizon
             // 

@@ -11,13 +11,13 @@ namespace MeteoStats
 
     public partial class MainWindow : Form
     {
+       
+
         public MainWindow()
         {
             InitializeComponent();
 
         }
-
-
 
         private void CheckBoxRain_CheckedChanged(object sender, EventArgs e)
         {
@@ -84,7 +84,7 @@ namespace MeteoStats
             if (filePath == null)
                 return;
 
-            var lines = File.ReadAllLines(filePath);
+            string[] lines = File.ReadAllLines(filePath);
 
             // Les données commencent après l'en-tête
             IEnumerable<string> dataLines = lines.Skip(1);
@@ -122,6 +122,22 @@ namespace MeteoStats
             // Remplir l'heure
             timeBeginInput.Text = minDate.ToString(timeFormat);
             timeEndInput.Text = maxDate.ToString(timeFormat);
+        }
+
+        private void OnClickExport(object sender, EventArgs e)
+        {
+            using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+            {
+                saveFileDialog.Filter = "Images PNG (*.png)|*.png";
+                saveFileDialog.FileName = "graphique.png"; // nom par défaut
+
+                if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Sauvegarde le graphique ScottPlot
+                    graphicPlot.Plot.SavePng(saveFileDialog.FileName, graphicPlot.Size.Width, graphicPlot.Size.Height);
+                    MessageBox.Show("Graphique sauvegardé en PNG !");
+                }
+            }
         }
     }
 }
