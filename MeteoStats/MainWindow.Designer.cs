@@ -221,11 +221,11 @@
             label2.AutoSize = true;
             label2.BackColor = SystemColors.ActiveBorder;
             label2.Font = new Font("Segoe UI", 12F);
-            label2.Location = new Point(46, 853);
+            label2.Location = new Point(68, 853);
             label2.Name = "label2";
-            label2.Size = new Size(86, 21);
+            label2.Size = new Size(64, 21);
             label2.TabIndex = 15;
-            label2.Text = "Date début";
+            label2.Text = "Date fin";
             // 
             // timeBeginInput
             // 
@@ -254,6 +254,7 @@
             importButton.TabIndex = 19;
             importButton.Text = "Import";
             importButton.UseVisualStyleBackColor = true;
+            importButton.Click += ImportButton_Click;
             // 
             // exportButton
             // 
