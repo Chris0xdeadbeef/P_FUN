@@ -16,7 +16,14 @@ namespace MeteoStats
         public MainWindow()
         {
             InitializeComponent();
+
+            //Par défaut les boutons ne sont pas cliquable
             checkBoxRain.Enabled = false;
+            checkBoxUv.Enabled = false;
+            checkBoxTemp.Enabled = false;
+            checkBoxFahrenheit.Enabled = false;
+            checkBoxCelsius.Enabled = false;
+            exportButton.Enabled = false;
 
         }
 
@@ -76,6 +83,9 @@ namespace MeteoStats
             plot.Title("Pluviométrie journalière");
             plot.XLabel("Date");
             plot.YLabel("Pluviométrie (mm)");
+
+            //Forcer le focus sur toutes les données
+            plot.Axes.AutoScale();
 
             graphicPlot.Refresh();
         }
@@ -199,6 +209,7 @@ namespace MeteoStats
                 Console.WriteLine($"{kvp.Key:dd.MM.yyyy} : {kvp.Value} mm");
 
             checkBoxRain.Enabled = true;
+            exportButton.Enabled = true;
         }
 
         private void OnClickExport(object sender, EventArgs e)
