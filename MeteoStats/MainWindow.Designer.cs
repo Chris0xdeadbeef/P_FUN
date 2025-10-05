@@ -49,8 +49,6 @@
             timeEndInput = new TextBox();
             importButton = new Button();
             exportButton = new Button();
-            titleHorizon = new Label();
-            titleVertical = new Label();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
@@ -267,31 +265,11 @@
             exportButton.UseVisualStyleBackColor = true;
             exportButton.Click += OnClickExport;
             // 
-            // titleHorizon
-            // 
-            titleHorizon.AutoSize = true;
-            titleHorizon.Location = new Point(533, 732);
-            titleHorizon.Name = "titleHorizon";
-            titleHorizon.Size = new Size(38, 15);
-            titleHorizon.TabIndex = 21;
-            titleHorizon.Text = "label3";
-            // 
-            // titleVertical
-            // 
-            titleVertical.AutoSize = true;
-            titleVertical.Location = new Point(12, 379);
-            titleVertical.Name = "titleVertical";
-            titleVertical.Size = new Size(38, 15);
-            titleVertical.TabIndex = 22;
-            titleVertical.Text = "label3";
-            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1184, 961);
-            Controls.Add(titleVertical);
-            Controls.Add(titleHorizon);
             Controls.Add(exportButton);
             Controls.Add(importButton);
             Controls.Add(timeEndInput);
@@ -344,7 +322,5 @@
         private TextBox timeEndInput;
         private Button importButton;
         private Button exportButton;
-        private Label titleHorizon;
-        private Label titleVertical;
     }
 }

@@ -1,10 +1,8 @@
-///ETML
+Ôªø///ETML
 ///Auteur : Christopher Ristic 
 ///Date: 08.09.2025
-///Description: Contient les mÈthodes pour la fenÍtre principale
+///Description: Contient les m√©thodes pour la fen√™tre principale
 
-
-using ScottPlot.Plottables;
 using System.Globalization;
 
 
@@ -18,56 +16,70 @@ namespace MeteoStats
         public MainWindow()
         {
             InitializeComponent();
+            checkBoxRain.Enabled = false;
 
         }
 
         private void CheckBoxRain_CheckedChanged(object sender, EventArgs e)
         {
-            if (checkBoxRain.Checked)
-            {
-                graphicPlot.Plot.Clear();
-
-                if (dailyRain.Count == 0)
-                {
-                    MessageBox.Show("Aucune donnÈe de pluie ‡ afficher !");
-                    return;
-                }
-
-                // Trier les donnÈes par date
-                var sortedDaily = dailyRain.OrderBy(kvp => kvp.Key).ToList();
-
-                // Extraire les valeurs et labels
-                double[] values = sortedDaily.Select(kvp => kvp.Value).ToArray();
-                string[] labels = sortedDaily.Select(kvp => kvp.Key.ToString("dd.MM.yyyy")).ToArray();
-                double[] positions = Enumerable.Range(0, values.Length).Select(x => (double)x).ToArray();
-
-                // Ajouter le BarPlot
-                var bar = graphicPlot.Plot.Add.Bars(values);
-
-                // DÈfinir les labels et la couleur pour chaque barre
-                for (int i = 0; i < bar.Bars.Count; i++)
-                {
-                    bar.Bars[i].Label = sortedDaily[i].Key.ToString("dd.MM.yyyy");
-                    bar.Bars[i].FillColor = ScottPlot.Color.Gray(20);
-                }
-
-                // Optionnel : mettre les labels des valeurs au-dessus des barres
-                bar.ValueLabelStyle.FontSize = 12;
-                bar.ValueLabelStyle.Bold = true;
-
-                // Ajouter les labels et le titre
-                graphicPlot.Plot.XLabel("Date");
-                graphicPlot.Plot.YLabel("PluviomÈtrie (mm)");
-                graphicPlot.Plot.Title("PluviomÈtrie journaliËre");
-
-                graphicPlot.Refresh();
-            }
-            else
+            if (!checkBoxRain.Checked)
             {
                 graphicPlot.Plot.Clear();
                 graphicPlot.Refresh();
+                return;
             }
+
+            if (dailyRain.Count == 0)
+            {
+                MessageBox.Show("Aucune donn√©e de pluie √† afficher");
+                checkBoxRain.Checked = false;
+                return;
+            }
+
+            // Trier les donn√©es par date
+            var sortedDaily = dailyRain.OrderBy(kvp => kvp.Key).ToList();
+
+            // Convertir les dates et valeurs pour ScottPlot
+            double[] xs = sortedDaily.Select(kvp => kvp.Key.ToOADate()).ToArray();
+            double[] ys = sortedDaily.Select(kvp => kvp.Value).ToArray();
+
+            var plot = graphicPlot.Plot;
+            plot.Clear();
+
+            // 1Ô∏è Trac√© de la courbe principale
+            var sig = plot.Add.SignalXY(xs, ys);
+            sig.LineWidth = 2;
+            sig.Color = ScottPlot.Colors.CornflowerBlue;
+
+            // 2Ô∏è Trac√© de l‚Äôaire sous la courbe 
+            // On cr√©e deux tableaux X et Y concat√©n√©s manuellement
+            double[] xsFilled = new double[xs.Length * 2];
+            double[] ysFilled = new double[ys.Length * 2];
+
+            // Premi√®re moiti√© = la courbe
+            Array.Copy(xs, xsFilled, xs.Length);
+            Array.Copy(ys, ysFilled, ys.Length);
+
+            // Seconde moiti√© = retour √† z√©ro (dans l‚Äôordre inverse)
+            for (int i = 0; i < xs.Length; ++i)
+            {
+                xsFilled[xs.Length + i] = xs[xs.Length - 1 - i];
+                ysFilled[ys.Length + i] = 0;
+            }
+
+            var fill = plot.Add.Polygon(xsFilled, ysFilled);
+            fill.FillColor = ScottPlot.Colors.CornflowerBlue.WithAlpha(0.3);
+            fill.LineWidth = 0;
+
+            plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.DateTimeAutomatic();
+
+            plot.Title("Pluviom√©trie journali√®re");
+            plot.XLabel("Date");
+            plot.YLabel("Pluviom√©trie (mm)");
+
+            graphicPlot.Refresh();
         }
+
 
         private void CheckBoxTemp_CheckedChanged(object sender, EventArgs e)
         {
@@ -107,7 +119,7 @@ namespace MeteoStats
         {
             string? filePath = null;
 
-            // SÈlection du fichier CSV
+            // S√©lection du fichier CSV
             using (OpenFileDialog openFileDialog = new())
             {
                 openFileDialog.InitialDirectory = Application.StartupPath;
@@ -118,7 +130,7 @@ namespace MeteoStats
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     filePath = openFileDialog.FileName;
-                    MessageBox.Show("Fichier chargÈ : " + filePath);
+                    MessageBox.Show("Fichier charg√© : " + filePath);
                 }
             }
 
@@ -139,7 +151,7 @@ namespace MeteoStats
                 return;
             }
 
-            // Les donnÈes commencent aprËs l'en-tÍte
+            // Les donn√©es commencent apr√®s l'en-t√™te
             IEnumerable<string> dataLines = lines.Skip(1);
 
             const string dateFormat = "dd.MM.yyyy";
@@ -160,22 +172,20 @@ namespace MeteoStats
                            CultureInfo.InvariantCulture,
                            DateTimeStyles.None,
                            out DateTime date) &&
-    double.TryParse(parts[rainIndex], NumberStyles.Any, CultureInfo.InvariantCulture, out double pluieRaw))
+                           double.TryParse(parts[rainIndex], NumberStyles.Any, CultureInfo.InvariantCulture, out double pluieRaw))
                 {
-                    double pluie = pluieRaw / 100.0; // Ajustement Èchelle
+                    double pluie = pluieRaw / 100.0; // Ajustement √©chelle
 
-                    // AgrÈgation journaliËre
+                    // Agr√©gation journali√®re
                     DateTime day = date.Date;
                     if (!dailyRain.ContainsKey(day))
                         dailyRain[day] = 0;
                     dailyRain[day] += pluie;
 
-                    // Mise ‡ jour min/max date
+                    // Mise √† jour min/max date
                     if (date < minDate) minDate = date;
                     if (date > maxDate) maxDate = date;
                 }
-
-
             }
 
             // Remplir les champs date et heure
@@ -184,9 +194,11 @@ namespace MeteoStats
             timeBeginInput.Text = minDate.ToString(timeFormat);
             timeEndInput.Text = maxDate.ToString(timeFormat);
 
-            // Affichage console pour vÈrification
+            // Affichage console pour v√©rification
             foreach (var kvp in dailyRain.OrderBy(x => x.Key))
                 Console.WriteLine($"{kvp.Key:dd.MM.yyyy} : {kvp.Value} mm");
+
+            checkBoxRain.Enabled = true;
         }
 
         private void OnClickExport(object sender, EventArgs e)
@@ -194,13 +206,13 @@ namespace MeteoStats
             using (SaveFileDialog saveFileDialog = new())
             {
                 saveFileDialog.Filter = "Images PNG (*.png)|*.png";
-                saveFileDialog.FileName = "graphique.png"; // nom par dÈfaut
+                saveFileDialog.FileName = "graphique.png"; // nom par d√©faut
 
                 if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     // Sauvegarde le graphique ScottPlot
                     graphicPlot.Plot.SavePng(saveFileDialog.FileName, graphicPlot.Size.Width, graphicPlot.Size.Height);
-                    MessageBox.Show("Graphique sauvegardÈ en PNG !");
+                    MessageBox.Show("Graphique sauvegard√© en PNG !");
                 }
             }
         }
