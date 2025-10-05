@@ -74,9 +74,6 @@ namespace MeteoStats
                 ysFilled[ys.Length + i] = 0;
             }
 
-            var fill = plot.Add.Polygon(xsFilled, ysFilled);
-            fill.FillColor = ScottPlot.Colors.CornflowerBlue.WithAlpha(0.3);
-            fill.LineWidth = 0;
 
             plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.DateTimeAutomatic();
 
@@ -210,6 +207,7 @@ namespace MeteoStats
 
             checkBoxRain.Enabled = true;
             exportButton.Enabled = true;
+
         }
 
         private void OnClickExport(object sender, EventArgs e)
