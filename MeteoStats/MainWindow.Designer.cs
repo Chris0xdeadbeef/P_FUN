@@ -182,6 +182,7 @@
             functionInput.Name = "functionInput";
             functionInput.Size = new Size(1044, 29);
             functionInput.TabIndex = 12;
+            functionInput.TextChanged += functionInput_TextChanged;
             // 
             // label1
             // 
