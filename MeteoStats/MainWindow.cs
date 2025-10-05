@@ -3,6 +3,8 @@
 ///Date: 08.09.2025
 ///Description: Contient les méthodes pour la fenêtre principale
 
+using ScottPlot.Statistics;
+using System;
 using System.Data;
 using System.Globalization;
 
@@ -231,7 +233,69 @@ namespace MeteoStats
 
         private void functionInput_TextChanged(object sender, EventArgs e)
         {
+            var plot = graphicPlot.Plot;
 
+            string input = functionInput.Text.Trim();
+            if (string.IsNullOrEmpty(input))
+            {
+                graphicPlot.Refresh();
+                return;
+            }
+
+            List<double> xs = new();
+            List<double> ys = new();
+
+            // Définir la plage X selon les données existantes
+            double xMin = 0;
+            double xMax = 10;
+
+            if (allRainData.Count > 0)
+            {
+                var allDates = allRainData.Values.SelectMany(d => d.Keys).Select(d => d.ToOADate());
+                xMin = allDates.Min();
+                xMax = allDates.Max();
+            }
+
+            double step = (xMax - xMin) / 500;
+
+            for (double x = xMin; x <= xMax; x += step)
+            {
+                double y = EvaluateFunction(input, x);
+                xs.Add(x);
+                ys.Add(y);
+            }
+
+            // Supprimer l'ancienne fonction si elle existe
+            var oldFunction = plot.GetPlottables().First();
+            if (oldFunction != null)
+                plot.Remove(oldFunction);
+
+            // Ajouter la nouvelle fonction
+            var functionSeries = plot.Add.Scatter(xs.ToArray(), ys.ToArray());
+            functionSeries.Color = ScottPlot.Color.Gray(25);
+            functionSeries.LineWidth = 2;
+            functionSeries.LegendText = "Function";
+
+            plot.Axes.AutoScale();
+            graphicPlot.Refresh();
+
+        }
+
+        private double EvaluateFunction(string function, double x)
+        {
+            function = function.Replace("x", x.ToString(CultureInfo.InvariantCulture));
+            function = function.Replace("^", "Pow"); // pour x^2 → Pow(x,2)
+
+            // Remplacer des fonctions mathématiques
+            function = function.Replace("sin", "Math.Sin");
+            function = function.Replace("cos", "Math.Cos");
+            function = function.Replace("tan", "Math.Tan");
+            function = function.Replace("sqrt", "Math.Sqrt");
+
+            // Utilisation de DataTable.Compute pour des opérations simples
+            var dt = new DataTable();
+            var v = dt.Compute(function, "");
+            return Convert.ToDouble(v);
         }
     }
 }
