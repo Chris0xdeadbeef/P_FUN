@@ -176,13 +176,25 @@ namespace MeteoStats
                     foreach (string line in lines.Skip(1))
                     {
                         var parts = line.Split(';');
+
+                        bool isValidDate = DateTime.TryParseExact(
+                            parts[1],
+                            "dd.MM.yyyy HH:mm",
+                            CultureInfo.InvariantCulture,
+                            DateTimeStyles.None,
+                            out DateTime date
+                        );
+
+                        bool isValidRainValue = double.TryParse(
+                            parts[rainIndex],
+                            NumberStyles.Any,
+                            CultureInfo.InvariantCulture,
+                            out double pluieRaw
+                        );
+                        
                         if (parts.Length <= rainIndex) continue;
 
-                        if (DateTime.TryParseExact(parts[1], $"dd.MM.yyyy HH:mm",
-                                   CultureInfo.InvariantCulture,
-                                   DateTimeStyles.None,
-                                   out DateTime date) &&
-                                   double.TryParse(parts[rainIndex], NumberStyles.Any, CultureInfo.InvariantCulture, out double pluieRaw))
+                        if (isValidDate && isValidRainValue)
                         {
                             double pluie = pluieRaw;
                             DateTime day = date.Date;
