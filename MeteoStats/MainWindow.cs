@@ -3,14 +3,11 @@
 ///Date: 08.09.2025
 ///Description: Contient les méthodes pour la fenêtre principale
 
-using ScottPlot.Statistics;
-using System;
 using System.Data;
 using System.Globalization;
 
 namespace MeteoStats
-{
-
+{    
     public partial class MainWindow : Form
     {
         static Dictionary<string, Dictionary<DateTime, double>> allRainData = new();
@@ -126,105 +123,47 @@ namespace MeteoStats
 
         private void ImportButton_Click(object sender, EventArgs e)
         {
-            using (OpenFileDialog openFileDialog = new())
+            using OpenFileDialog openFileDialog = new()
             {
-                openFileDialog.InitialDirectory = Application.StartupPath;
-                openFileDialog.Filter = "Fichiers CSV (*.csv)|*.csv|Tous les fichiers (*.*)|*.*";
-                openFileDialog.FilterIndex = 1;
-                openFileDialog.RestoreDirectory = true;
-                openFileDialog.Multiselect = true; // autoriser plusieurs fichiers
+                Filter = "Fichiers CSV (*.csv)|*.csv|Tous les fichiers (*.*)|*.*",
+                Multiselect = true
+            };
 
-                if (openFileDialog.ShowDialog() != DialogResult.OK)
-                    return;
+            if (openFileDialog.ShowDialog() != DialogResult.OK)
+                return;
 
-                if (openFileDialog.FileNames.Length != 2)
-                {
-                    MessageBox.Show("Veuillez sélectionner exactement 2 fichiers !");
-                    return;
-                }
-
-                allRainData.Clear(); // réinitialiser les séries précédentes
-
-                DateTime minDate = DateTime.MaxValue;
-                DateTime maxDate = DateTime.MinValue;
-                const string dateFormat = "dd.MM.yyyy";
-                const string timeFormat = "HH:mm";
-
-                var villes = new List<string>(); // pour stocker les noms des villes
-
-                for (int i = 0; i < 2; ++i)
-                {
-                    string filePath = openFileDialog.FileNames[i];
-
-                    string[] lines = File.ReadAllLines(filePath);
-                    if (lines.Length < 2) continue;
-
-                    // Nom de la ville dans colonne 0, ligne 1
-                    string cityName = lines[1].Split(';')[0].Trim('"');
-                    villes.Add(cityName);
-
-                    string[] headers = lines[0].Split(';');
-                    int rainIndex = Array.FindIndex(headers, h => h.Trim('"') == "rre150z0");
-                    if (rainIndex == -1)
-                    {
-                        MessageBox.Show($"Colonne 'rre150z0' introuvable dans {filePath} !");
-                        continue;
-                    }
-
-                    var dailyRain = new Dictionary<DateTime, double>();
-
-                    foreach (string line in lines.Skip(1))
-                    {
-                        var parts = line.Split(';');
-
-                        bool isValidDate = DateTime.TryParseExact(
-                            parts[1],
-                            "dd.MM.yyyy HH:mm",
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.None,
-                            out DateTime date
-                        );
-
-                        bool isValidRainValue = double.TryParse(
-                            parts[rainIndex],
-                            NumberStyles.Any,
-                            CultureInfo.InvariantCulture,
-                            out double pluieRaw
-                        );
-                        
-                        if (parts.Length <= rainIndex) continue;
-
-                        if (isValidDate && isValidRainValue)
-                        {
-                            double pluie = pluieRaw;
-                            DateTime day = date.Date;
-                            if (!dailyRain.ContainsKey(day)) dailyRain[day] = 0;
-                            dailyRain[day] += pluie;
-
-                            // Mettre à jour min/max global
-                            if (date < minDate) minDate = date;
-                            if (date > maxDate) maxDate = date;
-                        }
-                    }
-
-                    allRainData[cityName] = dailyRain;
-                }
-
-                if (allRainData.Count > 0)
-                    checkBoxRain.Enabled = true;
-
-                // Remplir les TextBox avec les dates début/fin et heures
-                beginDateInput.Text = minDate.ToString(dateFormat);
-                endDateInput.Text = maxDate.ToString(dateFormat);
-                timeBeginInput.Text = minDate.ToString(timeFormat);
-                timeEndInput.Text = maxDate.ToString(timeFormat);
-
-                // Mettre à jour le label des villes
-                ville.Text = $"Ville: {string.Join(", ", villes)} \nDates: {minDate:dd/MM/yyyy} - {maxDate:dd/MM/yyyy}";
+            if (openFileDialog.FileNames.Length != 2)
+            {
+                MessageBox.Show("Veuillez sélectionner exactement 2 fichiers !");
+                return;
             }
+
+            allRainData.Clear();
+
+            var villes = new List<string>();
+            DateTime globalMin = DateTime.MaxValue, globalMax = DateTime.MinValue;
+
+            foreach (var filePath in openFileDialog.FileNames)
+            {
+                var dailyRain = filePath.ReadRainData(out string cityName, out DateTime minDate, out DateTime maxDate);
+                allRainData[cityName] = dailyRain;
+                villes.Add(cityName);
+
+                if (minDate < globalMin) globalMin = minDate;
+                if (maxDate > globalMax) globalMax = maxDate;
+            }
+
+            // Active les cases
+            checkBoxRain.Enabled = allRainData.Count > 0;
+
+            // Met à jour l'UI
+            beginDateInput.Text = globalMin.ToString("dd.MM.yyyy");
+            endDateInput.Text = globalMax.ToString("dd.MM.yyyy");
+            timeBeginInput.Text = globalMin.ToString("HH:mm");
+            timeEndInput.Text = globalMax.ToString("HH:mm");
+
+            ville.Text = $"Ville: {string.Join(", ", villes)}\nDates: {globalMin:dd/MM/yyyy} - {globalMax:dd/MM/yyyy}";
         }
-
-
 
 
         private void OnClickExport(object sender, EventArgs e)
@@ -243,7 +182,8 @@ namespace MeteoStats
             }
         }
 
-        private void functionInput_TextChanged(object sender, EventArgs e)
+
+        private void FunctionInput_TextChanged(object sender, EventArgs e)
         {
             var plot = graphicPlot.Plot;
 
@@ -277,10 +217,6 @@ namespace MeteoStats
                 ys.Add(y);
             }
 
-            // Supprimer l'ancienne fonction si elle existe
-            var oldFunction = plot.GetPlottables().First();
-            if (oldFunction != null)
-                plot.Remove(oldFunction);
 
             // Ajouter la nouvelle fonction
             var functionSeries = plot.Add.Scatter(xs.ToArray(), ys.ToArray());
@@ -290,7 +226,6 @@ namespace MeteoStats
 
             plot.Axes.AutoScale();
             graphicPlot.Refresh();
-
         }
 
         private double EvaluateFunction(string function, double x)
@@ -305,10 +240,77 @@ namespace MeteoStats
             function = function.Replace("sqrt", "Math.Sqrt");
 
             // Utilisation de DataTable.Compute pour des opérations simples
-            var dt = new DataTable();
-            var v = dt.Compute(function, "");
-            return Convert.ToDouble(v);
+            var dataTable = new DataTable();
+            var computeResult = dataTable.Compute(function, "");
+
+            return Convert.ToDouble(computeResult);
         }
     }
+
+    public static class CsvExtensions
+    {
+        /// <summary>
+        /// Lit un fichier CSV météo et retourne un dictionnaire des pluies journalières.
+        /// </summary>
+        public static Dictionary<DateTime, double> ReadRainData(this string filePath, out string cityName,
+                                                                out DateTime minDate, out DateTime maxDate)
+        {
+            cityName = string.Empty;
+            minDate = DateTime.MaxValue;
+            maxDate = DateTime.MinValue;
+
+            var result = new Dictionary<DateTime, double>();
+            string[] lines = File.ReadAllLines(filePath);
+            if (lines.Length < 2) return result;
+
+            // Nom de la ville (colonne 0, ligne 1)
+            cityName = lines[1].Split(';')[0].Trim('"');
+
+            string[] headers = lines[0].Split(';');
+            int rainIndex = Array.FindIndex(headers, h => h.Trim('"') == "rre150z0");
+            if (rainIndex == -1)
+                throw new Exception($"Colonne 'rre150z0' introuvable dans {filePath} !");
+
+            foreach (string line in lines.Skip(1))
+            {
+                var parts = line.Split(';');
+                if (parts.Length <= rainIndex) continue;
+
+                bool isValidDate = DateTime.TryParseExact(parts[1], "dd.MM.yyyy HH:mm",
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date);
+
+                bool isValidRainValue = double.TryParse(parts[rainIndex], NumberStyles.Any,
+                    CultureInfo.InvariantCulture, out double pluieRaw);
+
+                if (isValidDate && isValidRainValue)
+                {
+                    DateTime day = date.Date;
+                    if (!result.ContainsKey(day)) result[day] = 0;
+                    result[day] += pluieRaw;
+
+                    if (date < minDate) minDate = date;
+                    if (date > maxDate) maxDate = date;
+                }
+            }
+
+            return result;
+        }
+    }
+
+    public static class DictionaryExtensions
+    {
+        /// <summary>
+        /// Retourne la date min et max à partir d'un dictionnaire de villes et de leurs données journalières.
+        /// </summary>
+        public static (DateTime min, DateTime max) GetDateRange(this Dictionary<string, Dictionary<DateTime, double>> data)
+        {
+            if (data.Count == 0)
+                return (DateTime.MinValue, DateTime.MinValue);
+
+            var allDates = data.Values.SelectMany(d => d.Keys);
+            return (allDates.Min(), allDates.Max());
+        }
+    }
+
 }
 
