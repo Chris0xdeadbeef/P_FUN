@@ -7,11 +7,14 @@ using System.Data;
 using System.Globalization;
 
 namespace MeteoStats
-{    
+{
     public partial class MainWindow : Form
     {
         static Dictionary<string, Dictionary<DateTime, double>> allRainData = new();
-        private ToolTip toolTip = new ToolTip();
+        private ToolTip toolTip = new();
+        // Couleurs pour les deux villes 
+        private static Color[] colors = { Color.CornflowerBlue, Color.DarkOrange };
+        private Dictionary<string, ScottPlot.Color> cityColors = new();
 
         public MainWindow()
         {
@@ -25,8 +28,7 @@ namespace MeteoStats
             checkBoxCelsius.Enabled = false;
             exportButton.Enabled = false;
 
-            toolTip.SetToolTip(pictureBox2, "Température de l'air à 2 m du sol");
-
+            toolTip.SetToolTip(pictureBox2, "Température de l'air à 2m du sol");
         }
 
         private void CheckBoxRain_CheckedChanged(object sender, EventArgs e)
@@ -40,14 +42,10 @@ namespace MeteoStats
                 return;
             }
 
-            // Couleurs pour les deux villes 
-            Color[] colors = { Color.CornflowerBlue, Color.Red };
-            int colorIndex = 0;
-
-            foreach (var cityKvp in allRainData)
+            foreach (var cityKvp in allRainData.Where(data => data.Value.Count > 0))
             {
                 var cityName = cityKvp.Key;
-                var dailyRain = cityKvp.Value;
+                var dailyRain = cityKvp.Value.OrderBy(kvp => kvp.Key).ToList();
 
                 if (dailyRain.Count == 0)
                     continue;
@@ -59,14 +57,13 @@ namespace MeteoStats
                 // Calcul des statistiques
                 double min = ys.Min();
                 double max = ys.Max();
-                double moyenne = ys.Average();
+                double average = ys.Average();
 
                 // Ligne principale
-                var sig = plot.Add.SignalXY(xs, ys);
-                sig.LineWidth = 2;
-                sig.LegendText = $"{cityName} | Min: {min:F2} mm, Max: {max:F2} mm, Moyenne: {moyenne:F2} mm";
-
-                ++colorIndex;
+                var signal = plot.Add.SignalXY(xs, ys);
+                signal.LineWidth = 2;
+                signal.Color = cityColors[cityName];
+                signal.LegendText = $"{cityName} | Min: {min:F2} mm, Max: {max:F2} mm, Moyenne: {average:F2} mm";
             }
 
             // Axe des X en dates
@@ -83,9 +80,6 @@ namespace MeteoStats
 
             exportButton.Enabled = true;
         }
-
-
-
 
         private void CheckBoxTemp_CheckedChanged(object sender, EventArgs e)
         {
@@ -106,7 +100,6 @@ namespace MeteoStats
         {
 
         }
-
 
         private void MainWindow_Resize(object sender, EventArgs e)
         {
@@ -139,6 +132,7 @@ namespace MeteoStats
             }
 
             allRainData.Clear();
+            cityColors.Clear();
 
             var villes = new List<string>();
             DateTime globalMin = DateTime.MaxValue, globalMax = DateTime.MinValue;
@@ -153,14 +147,22 @@ namespace MeteoStats
                 if (maxDate > globalMax) globalMax = maxDate;
             }
 
+            // Attribution des couleurs fixes aux villes
+            int index = 0;
+            foreach (var city in allRainData.Keys)
+            {
+                cityColors[city] = ScottPlot.Color.FromColor(colors[index % colors.Length]);
+                ++index;
+            }
+
             // Active les cases
             checkBoxRain.Enabled = allRainData.Count > 0;
 
             // Met à jour l'UI
             beginDateInput.Text = globalMin.ToString("dd.MM.yyyy");
-            endDateInput.Text = globalMax.ToString("dd.MM.yyyy");
+            endDateInput.Text   = globalMax.ToString("dd.MM.yyyy");
             timeBeginInput.Text = globalMin.ToString("HH:mm");
-            timeEndInput.Text = globalMax.ToString("HH:mm");
+            timeEndInput.Text   = globalMax.ToString("HH:mm");
 
             ville.Text = $"Ville: {string.Join(", ", villes)}\nDates: {globalMin:dd/MM/yyyy} - {globalMax:dd/MM/yyyy}";
         }
@@ -177,7 +179,6 @@ namespace MeteoStats
                 {
                     // Sauvegarde le graphique ScottPlot
                     graphicPlot.Plot.SavePng(saveFileDialog.FileName, graphicPlot.Size.Width, graphicPlot.Size.Height);
-                    MessageBox.Show("Graphique sauvegardé en PNG !");
                 }
             }
         }
@@ -220,7 +221,6 @@ namespace MeteoStats
 
             // Ajouter la nouvelle fonction
             var functionSeries = plot.Add.Scatter(xs.ToArray(), ys.ToArray());
-            functionSeries.Color = ScottPlot.Color.Gray(25);
             functionSeries.LineWidth = 2;
             functionSeries.LegendText = "Function";
 
@@ -245,6 +245,92 @@ namespace MeteoStats
 
             return Convert.ToDouble(computeResult);
         }
+
+        private void endDateInput_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+        private void endDateInput_Leave(object sender, EventArgs e)
+        {
+
+        }
+
+        private void EndDateInput_Validated(object sender, EventArgs e)
+        {
+            if (allRainData.Count == 0 || !checkBoxRain.Checked)
+                return;
+
+            // Vérifie que les deux champs contiennent des dates valides
+            if (!DateTime.TryParseExact(beginDateInput.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out DateTime startDate))
+            {
+                MessageBox.Show("Date de début invalide !");
+                return;
+            }
+
+            if (!DateTime.TryParseExact(endDateInput.Text, "dd.MM.yyyy", CultureInfo.InvariantCulture,
+                DateTimeStyles.None, out DateTime endDate))
+            {
+                MessageBox.Show("Date de fin invalide !");
+                return;
+            }
+
+            // Vérifie que la fin est après le début
+            if (endDate < startDate)
+            {
+                MessageBox.Show("La date de fin doit être postérieure à la date de début !");
+                return;
+            }
+
+            // Nettoie le graphique
+            var plot = graphicPlot.Plot;
+            plot.Clear();
+
+
+            // Filtrage des données selon la plage de dates
+            foreach (var cityKvp in allRainData.Where(c => c.Value.Count > 0))
+            {
+                var cityName = cityKvp.Key;
+
+                var filtered = cityKvp.Value
+                    .Where(kvp => kvp.Key >= startDate && kvp.Key <= endDate)
+                    .OrderBy(kvp => kvp.Key)
+                    .ToList();
+
+                if (filtered.Count == 0)
+                    continue;
+
+                double[] xs = filtered.Select(kvp => kvp.Key.ToOADate()).ToArray();
+                double[] ys = filtered.Select(kvp => kvp.Value).ToArray();
+
+                double min = ys.Min();
+                double max = ys.Max();
+                double moyenne = ys.Average();
+
+                var sig = plot.Add.SignalXY(xs, ys);
+                sig.LineWidth = 2;
+                sig.Color = cityColors[cityName]; // <-- couleur fixe par ville
+                sig.LegendText = $"{cityName} | Min: {min:F2} mm, Max: {max:F2} mm, Moyenne: {moyenne:F2} mm";
+            }
+
+            plot.Axes.Bottom.TickGenerator = new ScottPlot.TickGenerators.DateTimeAutomatic();
+            plot.Title($"Pluviométrie ({startDate:dd.MM.yyyy} - {endDate:dd.MM.yyyy})");
+            plot.XLabel("Date");
+            plot.YLabel("Pluviométrie (mm)");
+            plot.Legend.Alignment = ScottPlot.Alignment.UpperRight;
+            plot.ShowLegend();
+            plot.Axes.AutoScale();
+            graphicPlot.Refresh();
+        }
+
+        private void endDateInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true; // empêche le bip
+                EndDateInput_Validated(sender, e);
+            }
+        }
     }
 
     public static class CsvExtensions
@@ -261,20 +347,24 @@ namespace MeteoStats
 
             var result = new Dictionary<DateTime, double>();
             string[] lines = File.ReadAllLines(filePath);
-            if (lines.Length < 2) return result;
+
+            if (lines.Length < 2) 
+                return result;
 
             // Nom de la ville (colonne 0, ligne 1)
             cityName = lines[1].Split(';')[0].Trim('"');
 
             string[] headers = lines[0].Split(';');
             int rainIndex = Array.FindIndex(headers, h => h.Trim('"') == "rre150z0");
+
             if (rainIndex == -1)
                 throw new Exception($"Colonne 'rre150z0' introuvable dans {filePath} !");
 
             foreach (string line in lines.Skip(1))
             {
                 var parts = line.Split(';');
-                if (parts.Length <= rainIndex) continue;
+                if (parts.Length <= rainIndex) 
+                    continue;
 
                 bool isValidDate = DateTime.TryParseExact(parts[1], "dd.MM.yyyy HH:mm",
                     CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime date);
@@ -288,11 +378,13 @@ namespace MeteoStats
                     if (!result.ContainsKey(day)) result[day] = 0;
                     result[day] += pluieRaw;
 
-                    if (date < minDate) minDate = date;
-                    if (date > maxDate) maxDate = date;
+                    if (date < minDate) 
+                        minDate = date;
+
+                    if (date > maxDate) 
+                        maxDate = date;
                 }
             }
-
             return result;
         }
     }
@@ -307,10 +399,9 @@ namespace MeteoStats
             if (data.Count == 0)
                 return (DateTime.MinValue, DateTime.MinValue);
 
-            var allDates = data.Values.SelectMany(d => d.Keys);
+            var allDates = data.Values.SelectMany(data => data.Keys);
             return (allDates.Min(), allDates.Max());
         }
     }
-
 }
 

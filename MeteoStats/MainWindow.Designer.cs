@@ -213,6 +213,10 @@
             endDateInput.Name = "endDateInput";
             endDateInput.Size = new Size(85, 23);
             endDateInput.TabIndex = 16;
+            endDateInput.TextChanged += endDateInput_TextChanged;
+            endDateInput.KeyDown += endDateInput_KeyDown;
+            endDateInput.Leave += endDateInput_Leave;
+            endDateInput.Validated += EndDateInput_Validated;
             // 
             // label2
             // 
