@@ -191,20 +191,27 @@ namespace MeteoStats
 
         private double EvaluateFunction(string function, double x)
         {
-            function = function.Replace("x", x.ToString(CultureInfo.InvariantCulture));
-            function = function.Replace("^", "Pow"); // pour x^2 → Pow(x,2)
+            try
+            {
 
-            // Remplacer des fonctions mathématiques
-            function = function.Replace("sin", "Math.Sin");
-            function = function.Replace("cos", "Math.Cos");
-            function = function.Replace("tan", "Math.Tan");
-            function = function.Replace("sqrt", "Math.Sqrt");
+                function = function.Replace("x", x.ToString(CultureInfo.InvariantCulture));
+                function = function.Replace("^", "Pow"); // pour x^2 → Pow(x,2)
 
-            // Utilisation de DataTable.Compute pour des opérations simples
-            var dataTable = new DataTable();
-            var computeResult = dataTable.Compute(function, "");
+                // Remplacer des fonctions mathématiques
+                function = function.Replace("sin", "Math.Sin");
+                function = function.Replace("cos", "Math.Cos");
+                function = function.Replace("tan", "Math.Tan");
+                function = function.Replace("sqrt", "Math.Sqrt");
 
-            return Convert.ToDouble(computeResult);
+                // Utilisation de DataTable.Compute pour des opérations simples
+                var dataTable = new DataTable();
+                var computeResult = dataTable.Compute(function, "");
+
+                return Convert.ToDouble(computeResult);
+            }
+            catch {
+                return double.NaN;
+            }
         }
 
         private void endDateInput_TextChanged(object sender, EventArgs e)
@@ -322,9 +329,22 @@ namespace MeteoStats
 
             for (double x = xMin; x <= xMax; x += step)
             {
-                double y = EvaluateFunction(input, x);
-                xs.Add(x);
-                ys.Add(y);
+                double evaluationResult;
+                try
+                {
+                    evaluationResult = EvaluateFunction(input, x);
+                }
+                catch
+                {
+                    evaluationResult = double.NaN;
+                }
+
+                // Ajoute uniquement si c'est un nombre valide
+                if (!double.IsNaN(evaluationResult) && !double.IsInfinity(evaluationResult))
+                {
+                    xs.Add(x);
+                    ys.Add(evaluationResult);
+                }
             }
 
 
