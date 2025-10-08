@@ -160,9 +160,9 @@ namespace MeteoStats
 
             // Met à jour l'UI
             beginDateInput.Text = globalMin.ToString("dd.MM.yyyy");
-            endDateInput.Text   = globalMax.ToString("dd.MM.yyyy");
+            endDateInput.Text = globalMax.ToString("dd.MM.yyyy");
             timeBeginInput.Text = globalMin.ToString("HH:mm");
-            timeEndInput.Text   = globalMax.ToString("HH:mm");
+            timeEndInput.Text = globalMax.ToString("HH:mm");
 
             ville.Text = $"Ville: {string.Join(", ", villes)}\nDates: {globalMin:dd/MM/yyyy} - {globalMax:dd/MM/yyyy}";
         }
@@ -186,46 +186,7 @@ namespace MeteoStats
 
         private void FunctionInput_TextChanged(object sender, EventArgs e)
         {
-            var plot = graphicPlot.Plot;
 
-            string input = functionInput.Text.Trim();
-            if (string.IsNullOrEmpty(input))
-            {
-                graphicPlot.Refresh();
-                return;
-            }
-
-            List<double> xs = new();
-            List<double> ys = new();
-
-            // Définir la plage X selon les données existantes
-            double xMin = 0;
-            double xMax = 10;
-
-            if (allRainData.Count > 0)
-            {
-                var allDates = allRainData.Values.SelectMany(d => d.Keys).Select(d => d.ToOADate());
-                xMin = allDates.Min();
-                xMax = allDates.Max();
-            }
-
-            double step = (xMax - xMin) / 500;
-
-            for (double x = xMin; x <= xMax; x += step)
-            {
-                double y = EvaluateFunction(input, x);
-                xs.Add(x);
-                ys.Add(y);
-            }
-
-
-            // Ajouter la nouvelle fonction
-            var functionSeries = plot.Add.Scatter(xs.ToArray(), ys.ToArray());
-            functionSeries.LineWidth = 2;
-            functionSeries.LegendText = "Function";
-
-            plot.Axes.AutoScale();
-            graphicPlot.Refresh();
         }
 
         private double EvaluateFunction(string function, double x)
@@ -331,6 +292,59 @@ namespace MeteoStats
                 EndDateInput_Validated(sender, e);
             }
         }
+
+        private void functionInput_Validated(object sender, EventArgs e)
+        {
+            var plot = graphicPlot.Plot;
+
+            string input = functionInput.Text.Trim();
+            if (string.IsNullOrEmpty(input))
+            {
+                graphicPlot.Refresh();
+                return;
+            }
+
+            List<double> xs = new();
+            List<double> ys = new();
+
+            // Définir la plage X selon les données existantes
+            double xMin = 0;
+            double xMax = 10;
+
+            if (allRainData.Count > 0)
+            {
+                var allDates = allRainData.Values.SelectMany(d => d.Keys).Select(d => d.ToOADate());
+                xMin = allDates.Min();
+                xMax = allDates.Max();
+            }
+
+            double step = (xMax - xMin) / 500;
+
+            for (double x = xMin; x <= xMax; x += step)
+            {
+                double y = EvaluateFunction(input, x);
+                xs.Add(x);
+                ys.Add(y);
+            }
+
+
+            // Ajouter la nouvelle fonction
+            var functionSeries = plot.Add.Scatter(xs.ToArray(), ys.ToArray());
+            functionSeries.LineWidth = 2;
+            functionSeries.LegendText = "Function";
+
+            plot.Axes.AutoScale();
+            graphicPlot.Refresh();
+        }
+
+        private void functionInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                functionInput_Validated(sender, e);
+            }
+        }
     }
 
     public static class CsvExtensions
@@ -348,7 +362,7 @@ namespace MeteoStats
             var result = new Dictionary<DateTime, double>();
             string[] lines = File.ReadAllLines(filePath);
 
-            if (lines.Length < 2) 
+            if (lines.Length < 2)
                 return result;
 
             // Nom de la ville (colonne 0, ligne 1)
@@ -363,7 +377,7 @@ namespace MeteoStats
             foreach (string line in lines.Skip(1))
             {
                 var parts = line.Split(';');
-                if (parts.Length <= rainIndex) 
+                if (parts.Length <= rainIndex)
                     continue;
 
                 bool isValidDate = DateTime.TryParseExact(parts[1], "dd.MM.yyyy HH:mm",
@@ -378,10 +392,10 @@ namespace MeteoStats
                     if (!result.ContainsKey(day)) result[day] = 0;
                     result[day] += pluieRaw;
 
-                    if (date < minDate) 
+                    if (date < minDate)
                         minDate = date;
 
-                    if (date > maxDate) 
+                    if (date > maxDate)
                         maxDate = date;
                 }
             }

@@ -183,6 +183,8 @@
             functionInput.Size = new Size(1044, 29);
             functionInput.TabIndex = 12;
             functionInput.TextChanged += FunctionInput_TextChanged;
+            functionInput.KeyDown += functionInput_KeyDown;
+            functionInput.Validated += functionInput_Validated;
             // 
             // label1
             // 
